@@ -1,5 +1,19 @@
+const requestAnimationFrame =
+    window.requestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.msRequestAnimationFrame;
+
+const cancelAnimationFrame =
+    window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+
+
+
 let cursor = []
+let cursor_click_effect = []
 cursor[0] = document.createElement("img");
+cursor_click_effect[0] = document.createElement("img");
 
 cursor[0].src = "icons8-cursor-64.png";
 cursor[0].style.top = 0;
@@ -7,8 +21,35 @@ cursor[0].style.left = 0;
 cursor[0].style.zIndex = "9999"; // ensure the image is on top of other elements
 cursor[0].style.position = "fixed";
 
+cursor_click_effect[0].src = "sprites/tile0.png";
+cursor_click_effect[0].style.top = 0;
+cursor_click_effect[0].style.left = 0;
+cursor_click_effect[0].style.zIndex = "9998"; // ensure the image is on top of other elements
+cursor_click_effect[0].style.position = "fixed";
+cursor_click_effect[0].style.width = "150px";
+cursor_click_effect[0].style.height = "150px";
+
+
 // add the image to the document body
 document.body.appendChild(cursor[0]);
+document.body.appendChild(cursor_click_effect[0]);
+
+
+let last_time = 0;
+let current_frame = 0;
+let total_frames = 24; // 25, starting from 0
+let anim_req = null;
+function run_sheet(newtime) {
+    if ((last_time + 16) < newtime) {
+        cursor_click_effect[0].src = `sprites/tile${current_frame}.png`
+        last_time = newtime;
+        current_frame++
+    }
+    if (current_frame < 24) {
+        requestAnimationFrame(run_sheet)
+    }
+}
+requestAnimationFrame(run_sheet)
 
 
 
@@ -20,7 +61,7 @@ function v_DoCursor_Moving()
 {
     if (_i <= _total) {
         let btn = document.getElementById("btn-" + _i);
-        console.log(btn.getBoundingClientRect());
+        //console.log(btn.getBoundingClientRect());
         let box = btn.getBoundingClientRect();
         let x = (box.left + box.right) / 2;
         let y = (box.top + box.bottom) / 2;
@@ -44,10 +85,11 @@ function v_DoCursor_Moving()
         );
 
         animation.onfinish = (event) => {
-            console.log("Animation finished");
-            console.log(event);
+            console.log("Animation finished on btn-"+_i);
+            //console.log(event);
             start_x = x;
             start_y = y;
+            v_DoCursor_Clicks(btn)
             _i++;
             v_DoCursor_Moving()
         }
@@ -57,7 +99,13 @@ function v_DoCursor_Moving()
 v_DoCursor_Moving()
 
 
-function v_DoCursor_Clicks() { }
+function v_DoCursor_Clicks(_btn)
+{
+    _btn.dispatchEvent(new Event('click'));
+
+}
+
+
 function v_DoOverlay_Highlights() { }
 function v_DoOverlay_Confirmations() { }
 function v_DoAudio_Playbacks() { }
